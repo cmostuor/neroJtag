@@ -1,0 +1,27 @@
+NeroJTAG is yet another protocol for a USB JTAG adaptor. Currently there is a patch for Zoltán
+Csizmadia's xilprg to support the protocol, and a firmware for USB AVRs based on Dean Camera's
+LUFA. Firmware for the Cypress FX2LP to follow...
+
+The project build assumes a directory structure like this:
+
+src
+|
++-apps
+| |
+| +-nanduinoJtag
+|
++-libs
+|
++-3rd
+
+*** BUILDING ON LINUX ***
+
+make -f Makefile.linux
+
+
+The build will fetch, patch and build xilprg with NeroJTAG support. You can then do (for example):
+
+   xilprg/nero.sh 1 s3demo.bit
+
+The AVR firmware currently targets the AT90USB162. Change the Makefile if you have a different
+MCU. Suitable hardware platforms include the Nanduino, Teensy, Benito etc etc.
