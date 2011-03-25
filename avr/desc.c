@@ -107,7 +107,7 @@ static USBStringDescriptor PROGMEM productString = {
 	.UnicodeString          = L"LUFA Custom Device"
 };
 
-uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void** const descriptorAddress) {
+uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, const void** const descriptorAddress) {
 	const uint8_t descriptorType = (wValue >> 8);
 	const uint8_t descriptorNumber = (wValue & 0xFF);
 

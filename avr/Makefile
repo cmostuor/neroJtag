@@ -59,7 +59,7 @@
 # To rebuild project do "make clean" then "make all".
 #----------------------------------------------------------------------------
 
-LUFA_VERSION=100807
+LUFA_VERSION=101122
 
 # MCU name
 MCU = at90usb162
@@ -125,12 +125,15 @@ LUFA_OPTS += -D USE_FLASH_DESCRIPTORS
 LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
 LUFA_OPTS += -D NO_STREAM_CALLBACKS
 
+
 # Create the LUFA source path variables by including the LUFA root makefile
 #include $(LUFA_PATH)/LUFA/makefile
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = \
 	main.c                                                      \
+	jtag.c                                                      \
+	sync.c                                                      \
 	desc.c                                                      \
 	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Device.c             \
 	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Endpoint.c           \
@@ -142,7 +145,9 @@ SRC = \
 	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/DeviceStandardReq.c \
 	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/Events.c            \
 	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/HostStandardReq.c   \
+	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/EndpointStream.c    \
 	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/USBTask.c
+
 
 # List C++ source files here. (C dependencies are automatically generated.)
 CPPSRC = 
@@ -311,7 +316,7 @@ MATH_LIB = -lm
 #     For a directory that has spaces, enclose it in quotes.
 EXTRALIBDIRS = 
 
-#OTHER_LIBS = ../../../libs/avrutil/lib/avr/at90usb162/avrutil.a
+OTHER_LIBS = ../../../libs/avrutil/lib/avr/at90usb162/avrutil.a
 
 
 #---------------- External Memory Options ----------------
@@ -466,22 +471,12 @@ ALL_CPPFLAGS = -mmcu=$(MCU) -I. -x c++ $(CPPFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
+
 UNZ = unzip
 
 
 # Default target.
 all: ../../../3rd/LUFA$(LUFA_VERSION) LUFA$(LUFA_VERSION) begin gccversion sizebefore build sizeafter end
-
-LUFA$(LUFA_VERSION):
-	mkdir -p LUFA$(LUFA_VERSION)
-	cp -r ../../../3rd/LUFA$(LUFA_VERSION)/LUFA LUFA$(LUFA_VERSION)
-
-../../../3rd/LUFA$(LUFA_VERSION):
-	wget -O lufa.zip --no-check-certificate http://www.fourwalledcubicle.com/files/LUFA/LUFA-$(LUFA_VERSION).zip
-	$(UNZ) lufa.zip
-	mkdir -p ../../../3rd
-	rm lufa.zip
-	mv "LUFA $(LUFA_VERSION)" ../../../3rd/LUFA$(LUFA_VERSION)
 
 # Change the build target to build a HEX file or a library.
 build: elf hex eep lss sym
@@ -543,9 +538,9 @@ flip: $(TARGET).hex
 
 dfu: $(TARGET).hex
 	-dfu-programmer $(MCU) erase
-	-dfu-programmer $(MCU) flash --debug 1 $(TARGET).hex
+	-dfu-programmer $(MCU) flash $(TARGET).hex
 	-dfu-programmer $(MCU) reset
-	-dfu-programmer $(MCU) start
+	-dfu-programmer $(MCU) reset
 
 flip-ee: $(TARGET).hex $(TARGET).eep
 	$(COPY) $(TARGET).eep $(TARGET)eep.hex
@@ -555,7 +550,7 @@ flip-ee: $(TARGET).hex $(TARGET).eep
 	$(REMOVE) $(TARGET)eep.hex
 
 dfu-ee: $(TARGET).hex $(TARGET).eep
-	dfu-programmer $(MCU) flash-eeprom --debug 1 --suppress-bootloader-mem $(TARGET).eep
+	dfu-programmer $(MCU) eeprom-flash $(TARGET).eep
 	dfu-programmer $(MCU) reset
 
 
@@ -705,8 +700,8 @@ clean_list :
 	$(REMOVE) $(TARGET).map
 	$(REMOVE) $(TARGET).sym
 	$(REMOVE) $(TARGET).lss
-	$(REMOVE) $(SRC:%.c=$(OBJDIR)/%.o)
-	$(REMOVE) $(SRC:%.c=$(OBJDIR)/%.lst)
+	$(REMOVE) $(SRC:%.c=$(OBJDIR)/%.o) $(CPPSRC:%.cpp=$(OBJDIR)/%.o) $(ASRC:%.S=$(OBJDIR)/%.o)
+	$(REMOVE) $(SRC:%.c=$(OBJDIR)/%.lst) $(CPPSRC:%.cpp=$(OBJDIR)/%.lst) $(ASRC:%.S=$(OBJDIR)/%.lst)
 	$(REMOVE) $(SRC:.c=.s)
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) $(SRC:.c=.i)
@@ -734,3 +729,14 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 build elf hex eep lss sym coff extcoff doxygen clean          \
 clean_list clean_doxygen program dfu flip flip-ee dfu-ee      \
 debug gdb-config
+
+LUFA$(LUFA_VERSION):
+	mkdir -p LUFA$(LUFA_VERSION)
+	cp -r ../../../3rd/LUFA$(LUFA_VERSION)/LUFA LUFA$(LUFA_VERSION)
+
+../../../3rd/LUFA$(LUFA_VERSION):
+	wget -O lufa.zip --no-check-certificate http://www.fourwalledcubicle.com/files/LUFA/LUFA-$(LUFA_VERSION).zip
+	$(UNZ) lufa.zip
+	mkdir -p ../../../3rd
+	rm lufa.zip
+	mv "LUFA$(LUFA_VERSION)" ../../../3rd/LUFA$(LUFA_VERSION)
