@@ -93,18 +93,18 @@ static USBStringDescriptor PROGMEM languageString = {
 
 static USBStringDescriptor PROGMEM manufacturerString = {
 	.Header = {
-		.Size = USB_STRING_LEN(16),
+		.Size = USB_STRING_LEN(18),
 		.Type = DTYPE_String
 	},
-	.UnicodeString          = L"Chris McClelland"
+	.UnicodeString          = L"Swaton Electronics"
 };
 
 static USBStringDescriptor PROGMEM productString = {
 	.Header = {
-		.Size = USB_STRING_LEN(18),
+		.Size = USB_STRING_LEN(17),
 		.Type = DTYPE_String
 	},
-	.UnicodeString          = L"LUFA Custom Device"
+	.UnicodeString          = L"NeroJTAG/AVR v1.0"
 };
 
 uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, const void** const descriptorAddress) {
