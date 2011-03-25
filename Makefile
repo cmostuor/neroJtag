@@ -15,17 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 all: \
-		../../include \
-		xilprg
+		../../include
 	make -C avr
-
-xilprg:
-	./makeXilPrg.sh
 
 -include Makefile.common
 
 clean: FORCE
-	rm -rf xilprg
 	make -C avr clean
 
 FORCE:
