@@ -21,6 +21,16 @@
 static uint32 m_numBits = 0UL;
 static uint8 m_flagByte = 0x00;
 
+// Enable or disable the JTAG lines (i.e drive them or tristate them)
+//
+void jtagSetEnabled(bool enabled) {
+	if ( enabled ) {
+		DDRB |= (TCK | TMS | TDI);
+	} else {
+		DDRB &= ~(TCK | TMS | TDI);
+	}
+}               
+
 // Kick off a shift operation. Next time jtagExecuteShift() runs, it will execute the shift.
 //
 void jtagShiftBegin(uint32 numBits, uint8 flagByte) {

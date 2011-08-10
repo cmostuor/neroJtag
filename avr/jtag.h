@@ -35,6 +35,9 @@ enum {
 	TDI = 0x10
 };
 
+// Enable or disable the JTAG lines (i.e drive them or tristate them)
+void jtagSetEnabled(bool enabled);
+
 // Kick off a shift operation. Next time jtagExecuteShift() runs, it will execute the shift.
 void jtagShiftBegin(uint32 numBits, uint8 flagByte);
 

@@ -25,6 +25,10 @@
 #define CMD_READ_WRITE_EEPROM 0xA2
 
 // Bits in the mode word
-#define SYNC_MODE (1<<0)
+#define MODE_SYNC      (1<<0)
+#define MODE_JTAG      (1<<1)
+
+// Size of the firmware CSVF buffer in bytes
+#define CSVF_BUF_SIZE 12
 
 #endif

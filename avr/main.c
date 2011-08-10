@@ -37,7 +37,7 @@ int main(void) {
 	wdt_disable();
 	clock_prescale_set(clock_div_1);
 	PORTB = 0x00;
-	DDRB = 0x00;
+	jtagSetEnabled(false);
 	#ifdef DEBUG
 		usartInit(38400);
 		usartSendFlashString(PSTR("NanduinoJTAG...\r"));
@@ -61,8 +61,37 @@ void EVENT_USB_Device_ControlRequest(void) {
 	case CMD_MODE_STATUS:
 		if ( USB_ControlRequest.bmRequestType == (REQDIR_HOSTTODEVICE | REQTYPE_VENDOR) ) {
 			// Enable sync mode if wValue is nonzero
+			uint16 wBits = USB_ControlRequest.wValue;
+			uint16 wMask = USB_ControlRequest.wIndex;
 			Endpoint_ClearSETUP();
-			syncSetEnabled(USB_ControlRequest.wValue == 0 ? false : true);
+			if ( wMask & MODE_SYNC ) {
+				// Sync mode does a loopback, so endpoints can be sync'd with the host software
+				syncSetEnabled(wBits & MODE_SYNC ? true : false);
+			} else if ( wMask & MODE_JTAG ) {
+				// When in JTAG mode, the JTAG lines are driven; tristate otherwise
+				jtagSetEnabled(wBits & MODE_JTAG ? true : false);
+			}
+			Endpoint_ClearStatusStage();
+		} else if ( USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_VENDOR) ) {
+			uint8 statusBuffer[16];
+			statusBuffer[0] = 'N';                     // Magic bytes (my cat's name)
+			statusBuffer[1] = 'E';
+			statusBuffer[2] = 'M';
+			statusBuffer[3] = 'I';
+			statusBuffer[4] = 0x00;                    // Last operation diagnostic code
+			statusBuffer[5] = 0x00;                    // Flags
+			statusBuffer[6] = 0x24;                    // NeroJTAG endpoints
+			statusBuffer[7] = 0x00;                    // CommFPGA endpoints
+			statusBuffer[8] = 0x00;                    // Reserved
+			statusBuffer[9] = 0x00;                    // Reserved
+			statusBuffer[10] = 0x00;                   // Reserved
+			statusBuffer[11] = 0x00;                   // Reserved
+			statusBuffer[12] = 0x00;                   // Reserved
+			statusBuffer[13] = 0x00;                   // Reserved
+			statusBuffer[14] = 0x00;                   // Reserved
+			statusBuffer[15] = 0x00;                   // Reserved
+			Endpoint_ClearSETUP();
+			Endpoint_Write_Control_Stream_LE(statusBuffer, 16);
 			Endpoint_ClearStatusStage();
 		}
 		break;
@@ -105,13 +134,9 @@ void EVENT_USB_Device_ControlRequest(void) {
 void EVENT_USB_Device_Connect(void) {
 	// Connected
 	PORTB = 0x00;
-	DDRB = TCK | TMS | TDI;
 }
 
-void EVENT_USB_Device_Disconnect(void) {
-	// Disconnected
-	DDRB = 0x00;
-}
+void EVENT_USB_Device_Disconnect(void) { }
 
 void EVENT_USB_Device_ConfigurationChanged(void) {
 	if ( !(Endpoint_ConfigureEndpoint(OUT_ENDPOINT_ADDR,
