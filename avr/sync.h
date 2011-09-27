@@ -17,7 +17,7 @@
 #ifndef SYNC_H
 #define SYNC_H
 
-#include <types.h>
+#include <makestuff.h>
 
 // Enable or disable the sync mode
 void syncSetEnabled(bool enable);

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <LUFA/Drivers/USB/USB.h>
-#include <types.h>
+#include <makestuff.h>
 #include "sync.h"
 #include "desc.h"
 

@@ -20,8 +20,8 @@
 #include <string.h>
 #include <LUFA/Version.h>
 #include <LUFA/Drivers/USB/USB.h>
+#include "makestuff.h"
 #include "desc.h"
-#include "types.h"
 #include "jtag.h"
 #include "sync.h"
 #include "vendorCommands.h"

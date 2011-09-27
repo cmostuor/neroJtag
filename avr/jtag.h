@@ -17,7 +17,7 @@
 #ifndef JTAG_H
 #define JTAG_H
 
-#include <types.h>
+#include <makestuff.h>
 
 // Macros for NeroJTAG implementation
 #define bmNEEDRESPONSE (1<<0)
