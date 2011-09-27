@@ -1,44 +1,39 @@
-NeroJTAG is yet another protocol for a USB JTAG adaptor. On the host side there is a simple library
-"libnero", and a patch for Zoltán Csizmadia's excellent xilprg (programmer for Xilinx FPGAs), and a
-simple XSVF player. You can get the host stuff by downloading the Neopurgo package from here:
+An implementation of the NeroJTAG protocol for USB AVRs.
 
-    https://github.com/makestuff/neopurgo
+On Windows you'll need WinAVR (from http://winavr.sourceforge.net)
 
-On the device side, there are two implementations of the NeroJTAG protocol, one for the Cypress FX2
-chip (included in the Neopurgo package above) and one for the Atmel USB AVRs, included here. The
-firmware currently targets the AT90USB162. Change the Makefile if you have a different MCU.
-Suitable hardware platforms include the Nanduino, Teensy, Benito etc etc.
+On Linux you'll need gcc-avr and avr-libc (sudo apt-get install...)
 
-The project build assumes this directory ("neroJtag") lives within a structure like this:
+chris@wotan$ curl -sL http://www.swaton.ukfsn.org/bin/makestuff-lindar-20110912.tar.gz | tar zxf -
+chris@wotan$ cd makestuff/apps
+chris@wotan$ ../common/msget.sh neroJtag
+chris@wotan$ cd neroJtag
+chris@wotan$ make
+chris@wotan$ sudo make dfu
 
-src
-|
-+-apps
-| |
-| +-neroJtag
-|
-+-libs
-|
-+-3rd
+Now you can (for example) program a Digilent S3BOARD:
 
-*** BUILDING ON WINDOWS ***
-
-Prerequisites:
-   * http://winavr.sourceforge.net/
-   * http://www.atmel.com/dyn/resources/prod_documents/flip-2_4_6.zip
-   * http://www.java.com (FLIP needs this)
-
-make clean
-make
-make -C avr flip
-
-*** BUILDING ON LINUX ***
-
-Prerequisites:
-   * sudo apt-get install gcc-avr
-   * sudo apt-get install avr-libc
-   * sudo apt-get install dfu-programmer
-
-make clean
-make
-sudo make -C avr dfu
+chris@wotan$ cd $HOME
+chris@wotan$ curl -sL http://www.swaton.ukfsn.org/bin/libfpgalink-20110912.tar.gz | tar zxf -
+chris@wotan$ cd libfpgalink-20110912/examples/python/
+chris@wotan$ wget http://www.digilentinc.com/Data/Products/S3BOARD/S3BOARD-demo.zip
+chris@wotan$ unzip S3BOARD-demo.zip
+chris@wotan$ cat > s3demo.batch <<EOF
+> setMode -bs
+> setCable -port xsvf -file s3demo.xsvf
+> addDevice -p 1 -file S3Demo/s3demo.bit
+> addDevice -p 2 -file /opt/Xilinx/13.1/ISE_DS/ISE/xcf/data/xcf02s.bsd
+> program -p 1
+> quit
+> EOF
+chris@wotan$ impact -batch s3demo.batch
+chris@wotan$ sudo LD_LIBRARY_PATH=../../linux.x86_64/rel python
+Python 2.7.1+ (r271:86832, Apr 11 2011, 18:13:53) 
+[GCC 4.5.2] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from fpgalink import *
+>>> handle = flOpen("03eb:3002")
+>>> flPlayXSVF(handle, "s3demo.xsvf")
+>>> flClose(handle)
+>>> 
+chris@wotan$ 
