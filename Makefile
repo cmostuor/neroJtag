@@ -316,7 +316,7 @@ MATH_LIB = -lm
 #     For a directory that has spaces, enclose it in quotes.
 EXTRALIBDIRS = 
 
-OTHER_LIBS = ../../libs/avrutil/lib/avr/at90usb162/avrutil.a
+OTHER_LIBS = ../../libs/avrutil/lib/avr/$(MCU)/avrutil.a
 
 
 #---------------- External Memory Options ----------------
@@ -476,7 +476,7 @@ UNZ = unzip
 
 
 # Default target.
-all: ../../3rd/LUFA$(LUFA_VERSION) LUFA$(LUFA_VERSION) begin gccversion sizebefore build sizeafter end
+all: $(OTHER_LIBS) ../../3rd/LUFA$(LUFA_VERSION) LUFA$(LUFA_VERSION) begin gccversion sizebefore build sizeafter end
 
 # Change the build target to build a HEX file or a library.
 build: elf hex eep lss sym
@@ -740,3 +740,12 @@ LUFA$(LUFA_VERSION):
 	mkdir -p ../../3rd
 	rm lufa.zip
 	mv "LUFA$(LUFA_VERSION)" ../../3rd/LUFA$(LUFA_VERSION)
+
+../../libs/avrutil:
+	wget --no-check-certificate -O avrutil.tar.gz https://github.com/makestuff/avrutil/tarball/master
+	tar zxf avrutil.tar.gz
+	mv makestuff-avrutil-* $@
+	rm -f avrutil.tar.gz
+
+../../libs/avrutil/lib/avr/$(MCU)/avrutil.a: ../../libs/avrutil
+	cd ../../libs/avrutil && make
