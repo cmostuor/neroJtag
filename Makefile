@@ -59,10 +59,14 @@
 # To rebuild project do "make clean" then "make all".
 #----------------------------------------------------------------------------
 
-LUFA_VERSION=101122
+LUFA_VERSION=110528
 
 # MCU name
 MCU = at90usb162
+
+
+# Target architecture (see library "Board Types" documentation).
+ARCH = AVR8
 
 
 # Target board (see library "Board Types" documentation, NONE for projects not requiring
@@ -77,8 +81,8 @@ BOARD = BUMBLEB
 #     calculate timings. Do NOT tack on a 'UL' at the end, this will be done
 #     automatically to create a 32-bit value in your source code.
 #
-#     This will be an integer division of F_CLOCK below, as it is sourced by
-#     F_CLOCK after it has run through any CPU prescalers. Note that this value
+#     This will be an integer division of F_USB below, as it is sourced by
+#     F_USB after it has run through any CPU prescalers. Note that this value
 #     does not *change* the processor frequency - it should merely be updated to
 #     reflect the processor speed set externally so that the code can use accurate
 #     software delays.
@@ -86,7 +90,7 @@ F_CPU = 16000000
 
 
 # Input clock frequency.
-#     This will define a symbol, F_CLOCK, in all source code files equal to the 
+#     This will define a symbol, F_USB, in all source code files equal to the 
 #     input clock frequency (before any prescaling is performed) in Hz. This value may
 #     differ from F_CPU if prescaling is used on the latter, and is required as the
 #     raw input clock is fed directly to the PLL sections of the AVR for high speed
@@ -96,7 +100,7 @@ F_CPU = 16000000
 #
 #     If no clock division is performed on the input clock inside the AVR (via the
 #     CPU clock adjust registers or the clock division fuses), this will be equal to F_CPU.
-F_CLOCK = $(F_CPU)
+F_USB = $(F_CPU)
 
 
 # Output format. (can be srec, ihex, binary)
@@ -114,7 +118,7 @@ OBJDIR = .
 
 
 # Path to the LUFA library
-LUFA_PATH = LUFA$(LUFA_VERSION)
+LUFA_PATH = LUFA-$(LUFA_VERSION)
 
 
 # LUFA library compile-time options and predefined tokens
@@ -123,30 +127,16 @@ LUFA_OPTS += -D FIXED_CONTROL_ENDPOINT_SIZE=8
 LUFA_OPTS += -D FIXED_NUM_CONFIGURATIONS=1
 LUFA_OPTS += -D USE_FLASH_DESCRIPTORS
 LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
-LUFA_OPTS += -D NO_STREAM_CALLBACKS
 
 
 # Create the LUFA source path variables by including the LUFA root makefile
-#include $(LUFA_PATH)/LUFA/makefile
+include $(LUFA_PATH)/LUFA/makefile
+
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = \
-	main.c                                                      \
-	jtag.c                                                      \
-	sync.c                                                      \
-	desc.c                                                      \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Device.c             \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Endpoint.c           \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Host.c               \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/Pipe.c               \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/USBController.c      \
-	$(LUFA_PATH)/LUFA/Drivers/USB/LowLevel/USBInterrupt.c       \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/ConfigDescriptor.c  \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/DeviceStandardReq.c \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/Events.c            \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/HostStandardReq.c   \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/EndpointStream.c    \
-	$(LUFA_PATH)/LUFA/Drivers/USB/HighLevel/USBTask.c
+	$(wildcard *.c) \
+	$(LUFA_SRC_USB)
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -193,20 +183,20 @@ CSTANDARD = -std=c99
 
 # Place -D or -U options here for C sources
 CDEFS  = -DF_CPU=$(F_CPU)UL
-CDEFS += -DF_CLOCK=$(F_CLOCK)UL
-CDEFS += -DBOARD=BOARD_$(BOARD)
+CDEFS += -DF_USB=$(F_USB)UL
+CDEFS += -DBOARD=BOARD_$(BOARD) -DARCH=ARCH_$(ARCH)
 CDEFS += $(LUFA_OPTS)
 
 
 # Place -D or -U options here for ASM sources
 ADEFS  = -DF_CPU=$(F_CPU)
-ADEFS += -DF_CLOCK=$(F_CLOCK)UL
+ADEFS += -DF_USB=$(F_USB)UL
 ADEFS += -DBOARD=BOARD_$(BOARD)
 ADEFS += $(LUFA_OPTS)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS  = -DF_CPU=$(F_CPU)UL
-CPPDEFS += -DF_CLOCK=$(F_CLOCK)UL
+CPPDEFS += -DF_USB=$(F_USB)UL
 CPPDEFS += -DBOARD=BOARD_$(BOARD)
 CPPDEFS += $(LUFA_OPTS)
 #CPPDEFS += -D__STDC_LIMIT_MACROS
@@ -316,7 +306,6 @@ MATH_LIB = -lm
 #     For a directory that has spaces, enclose it in quotes.
 EXTRALIBDIRS = 
 
-OTHER_LIBS = ../../libs/avrutil/lib/avr/$(MCU)/avrutil.a
 
 
 #---------------- External Memory Options ----------------
@@ -342,7 +331,7 @@ LDFLAGS += -Wl,--relax
 LDFLAGS += -Wl,--gc-sections
 LDFLAGS += $(EXTMEMOPTS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
-LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB) $(OTHER_LIBS)
+LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB) ../../libs/avrutil/lib/avr/$(MCU)/avrutil.a
 #LDFLAGS += -T linker_script.x
 
 
@@ -472,11 +461,10 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 
-UNZ = unzip
 
 
 # Default target.
-all: $(OTHER_LIBS) ../../3rd/LUFA$(LUFA_VERSION) LUFA$(LUFA_VERSION) begin gccversion sizebefore build sizeafter end
+all: ../../libs/avrutil/lib/avr/$(MCU)/avrutil.a LUFA-$(LUFA_VERSION) begin gccversion sizebefore build sizeafter end
 
 # Change the build target to build a HEX file or a library.
 build: elf hex eep lss sym
@@ -645,7 +633,7 @@ extcoff: $(TARGET).elf
 # Link: create ELF output file from object files.
 .SECONDARY : $(TARGET).elf
 .PRECIOUS : $(OBJ)
-$(TARGET).elf: $(OBJ)
+%.elf: $(OBJ)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -730,16 +718,16 @@ build elf hex eep lss sym coff extcoff doxygen clean          \
 clean_list clean_doxygen program dfu flip flip-ee dfu-ee      \
 debug gdb-config
 
-LUFA$(LUFA_VERSION):
-	mkdir -p LUFA$(LUFA_VERSION)
-	cp -r ../../3rd/LUFA$(LUFA_VERSION)/LUFA LUFA$(LUFA_VERSION)
+$(LUFA_PATH)/LUFA/makefile LUFA-$(LUFA_VERSION): ../../3rd/LUFA-$(LUFA_VERSION)
+	mkdir -p LUFA-$(LUFA_VERSION)
+	cp -r ../../3rd/LUFA-$(LUFA_VERSION)/LUFA LUFA-$(LUFA_VERSION)
 
-../../3rd/LUFA$(LUFA_VERSION):
+../../3rd/LUFA-$(LUFA_VERSION):
 	wget -O lufa.zip --no-check-certificate http://www.fourwalledcubicle.com/files/LUFA/LUFA-$(LUFA_VERSION).zip
-	$(UNZ) lufa.zip
+	unzip lufa.zip
 	mkdir -p ../../3rd
 	rm lufa.zip
-	mv "LUFA$(LUFA_VERSION)" ../../3rd/LUFA$(LUFA_VERSION)
+	mv "LUFA-$(LUFA_VERSION)" ../../3rd/LUFA-$(LUFA_VERSION)
 
 ../../libs/avrutil:
 	wget --no-check-certificate -O avrutil.tar.gz https://github.com/makestuff/avrutil/tarball/master
@@ -748,4 +736,4 @@ LUFA$(LUFA_VERSION):
 	rm -f avrutil.tar.gz
 
 ../../libs/avrutil/lib/avr/$(MCU)/avrutil.a: ../../libs/avrutil
-	cd ../../libs/avrutil && make
+	make -C ../../libs/avrutil

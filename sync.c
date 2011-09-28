@@ -33,7 +33,7 @@ void syncExecute(void) {
 	Endpoint_SelectEndpoint(OUT_ENDPOINT_ADDR);
 	if ( Endpoint_IsOUTReceived() ) {
 		uint8 buf[4], i;
-		Endpoint_Read_Stream_LE(buf, 4);
+		Endpoint_Read_Stream_LE(buf, 4, NULL);
 		Endpoint_ClearOUT();
 		for ( i = 0; i < 4; i++ ) {
 			if ( buf[i] >= 'a' && buf[i] <= 'z' ) {
@@ -42,7 +42,7 @@ void syncExecute(void) {
 		}
 		Endpoint_SelectEndpoint(IN_ENDPOINT_ADDR);
 		while ( !Endpoint_IsINReady() );
-		Endpoint_Write_Stream_LE(buf, 4);
+		Endpoint_Write_Stream_LE(buf, 4, NULL);
 		Endpoint_ClearIN();
 	}
 }

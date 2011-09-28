@@ -116,7 +116,7 @@ void jtagShiftExecute(void) {
 				bitsRead = (m_numBits >= (ENDPOINT_SIZE<<3)) ? ENDPOINT_SIZE<<3 : m_numBits;
 				bytesRead = bitsToBytes(bitsRead);
 				Endpoint_SelectEndpoint(OUT_ENDPOINT_ADDR);
-				Endpoint_Read_Stream_LE(buf, bytesRead);
+				Endpoint_Read_Stream_LE(buf, bytesRead, NULL);
 				ptr = buf;
 				if ( bitsRead == m_numBits ) {
 					// This is the last chunk
@@ -155,7 +155,7 @@ void jtagShiftExecute(void) {
 					}
 				}
 				Endpoint_SelectEndpoint(IN_ENDPOINT_ADDR);
-				Endpoint_Write_Stream_LE(buf, bytesRead);
+				Endpoint_Write_Stream_LE(buf, bytesRead, NULL);
 				m_numBits -= bitsRead;
 			}
 			Endpoint_ClearIN();
@@ -167,7 +167,7 @@ void jtagShiftExecute(void) {
 			while ( m_numBits ) {
 				bitsRead = (m_numBits >= (ENDPOINT_SIZE<<3)) ? ENDPOINT_SIZE<<3 : m_numBits;
 				bytesRead = bitsToBytes(bitsRead);
-				Endpoint_Read_Stream_LE(buf, bytesRead);
+				Endpoint_Read_Stream_LE(buf, bytesRead, NULL);
 				ptr = buf;
 				if ( bitsRead == m_numBits ) {
 					// This is the last chunk
@@ -248,7 +248,7 @@ void jtagShiftExecute(void) {
 						*ptr++ = shiftInOut(tdiByte);
 					}
 				}
-				Endpoint_Write_Stream_LE(buf, bytesRead);
+				Endpoint_Write_Stream_LE(buf, bytesRead, NULL);
 				m_numBits -= bitsRead;
 			}
 			Endpoint_ClearIN();
