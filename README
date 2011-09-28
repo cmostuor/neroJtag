@@ -1,15 +1,31 @@
 An implementation of the NeroJTAG protocol for USB AVRs.
 
-On Windows you'll need WinAVR (from http://winavr.sourceforge.net)
+BUILDING
 
-On Linux you'll need gcc-avr and avr-libc (sudo apt-get install...)
+On Windows you'll need:
+  * WinAVR (http://winavr.sourceforge.net)
+  * Atmel FLIP (http://www.atmel.com/dyn/products/tools_card.asp?tool_id=3886)
 
-chris@wotan$ curl -sL http://www.swaton.ukfsn.org/bin/makestuff-lindar-20110912.tar.gz | tar zxf -
-chris@wotan$ cd makestuff/apps
-chris@wotan$ ../common/msget.sh neroJtag
-chris@wotan$ cd neroJtag
-chris@wotan$ make
-chris@wotan$ sudo make dfu
+On Linux you'll need:
+  * sudo apt-get install gcc-avr
+  * sudo apt-get install avr-libc
+  * sudo apt-get install dfu-programmer
+
+Install MakeStuff build infrastructure (see http://bit.ly/makestuff):
+  curl -sL http://www.swaton.ukfsn.org/bin/makestuff-lindar-20110912.tar.gz | tar zxf -
+
+Fetch neroJtag and build:
+  cd makestuff/apps
+  ../common/msget.sh neroJtag
+  cd neroJtag/
+  make
+
+Flashing the firmware:
+  On Linux: sudo make dfu
+  On Windows: make flip
+
+
+USAGE
 
 Now you can (for example) program a Digilent S3BOARD:
 
@@ -37,3 +53,6 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> flClose(handle)
 >>> 
 chris@wotan$ 
+
+You will find a nice infrastructure for building FPGA code in the 'vhdl' directory of the
+FPGALink project (https://github.com/makestuff/libfpgalink).
