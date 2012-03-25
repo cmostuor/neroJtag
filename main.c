@@ -40,7 +40,7 @@ int main(void) {
 	jtagSetEnabled(false);
 	#ifdef DEBUG
 		usartInit(38400);
-		usartSendFlashString(PSTR("NanduinoJTAG...\r"));
+		usartSendFlashString(PSTR("MakeStuff NeroJTAG/AVR v0.9...\r"));
 	#endif
 	sei();
 	USB_Init();

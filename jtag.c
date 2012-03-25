@@ -159,6 +159,7 @@ void jtagShiftExecute(void) {
 				m_numBits -= bitsRead;
 			}
 			Endpoint_ClearIN();
+			Endpoint_ClearOUT();
 		} else {
 			// The host is giving us data, but does not need a response
 			uint8 buf[ENDPOINT_SIZE], *ptr, bytesRead, bytesRemaining;
@@ -200,6 +201,7 @@ void jtagShiftExecute(void) {
 				}
 				m_numBits -= bitsRead;
 			}			
+			Endpoint_ClearOUT();
 		}
 	} else {
 		if ( m_flagByte & bmNEEDRESPONSE ) {

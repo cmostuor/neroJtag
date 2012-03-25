@@ -29,6 +29,6 @@
 #define MODE_JTAG      (1<<1)
 
 // Size of the firmware CSVF buffer in bytes
-#define CSVF_BUF_SIZE 12
+#define CSVF_BUF_SIZE 128
 
 #endif
